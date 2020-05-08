@@ -20,19 +20,22 @@ int q=0,i=0,k=0,X=0,Y=1, h=0;
 	float vel[N][2];
 	float mass[N];
 	int step,part;
+	double start;
+	double end;
 
 
 int main(void){
 
 	vect_t* forces = malloc(n*sizeof(vect_t));
 
-	clock_t begin = clock();
+	start = omp_get_wtime();
+	#pragma omp parallel for
 	for (step = 1; step <= n; step++) {
 
 		forces = memset(forces, 0, n*sizeof(vect_t));
 
 		//Initialize
-		#pragma omp parallel shared(pos,vel,old_pos,mass)
+		#pragma omp parallel shared(pos,vel,old_pos,mass) private(q)
         {
 		for(q=0,i=0;q<N;q++,i++) {
 
@@ -57,7 +60,7 @@ int main(void){
 
 		//Calculate Force
 		
-		#pragma omp parallel shared(forces)
+		#pragma omp parallel shared(x_diff,y_diff,dist,dist_cubed,forces,pos,mass) private(q,k)
         {
 		for(q = 0; q < N ;q++) {
 
@@ -75,7 +78,7 @@ int main(void){
 	}
 
 		//Calculate New Position
-		#pragma omp parallel shared(pos,vel)
+		#pragma omp parallel shared(pos,vel,mass,forces) private(h)
         {
 		for(h=0 ;h < N; h++){
 				pos[h][X] += delta_t*vel[h][X];
@@ -89,9 +92,9 @@ int main(void){
 	    }
 
     }
-	    clock_t end = clock();
-		double time_spent =(double)(end-begin)/CLOCKS_PER_SEC;
-		printf("The time is %f",time_spent);
+	    end = omp_get_wtime();
+
+		printf("The time is %f",end - begin);
 
 		return EXIT_SUCCESS;
 }

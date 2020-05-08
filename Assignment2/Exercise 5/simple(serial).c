@@ -20,13 +20,15 @@ int q=0,i=0,k=0,X=0,Y=1, h=0;
 	float vel[N][2];
 	float mass[N];
 	int step,part;
+	double begin;
+	double end;
 
 
 int main(void){
 
 	vect_t* forces = malloc(n*sizeof(vect_t));
 
-	clock_t begin = clock();
+	start = omp_get_wtime();
 	for (step = 1; step <= n; step++) {
 
 		forces = memset(forces, 0, n*sizeof(vect_t));
@@ -85,9 +87,10 @@ int main(void){
 		  }
 
     }
-	    clock_t end = clock();
-		double time_spent =(double)(end-begin)/CLOCKS_PER_SEC;
-		printf("The time is %f",time_spent);
+	   
+	    end = omp_get_wtime();
+	   
+		printf("The time is %f",end - begin);
 
 		return EXIT_SUCCESS;
 }
