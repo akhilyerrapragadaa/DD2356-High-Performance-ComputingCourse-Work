@@ -34,6 +34,8 @@ int main(void){
 		//Initialize
 		#pragma omp parallel shared(pos,vel,old_pos,mass) private(q)
         {
+        #pragma omp parallel for schedule(dynamic)
+        {
 		for(q=0,i=0;q<N;q++,i++) {
 
 		     	pos[q][X] = (rand() / (double)(RAND_MAX)) * 2 - 1;
@@ -54,11 +56,14 @@ int main(void){
 
 		 }
 		 }
+		 }
 
 		//Calculate Force
         
 		for(q = 0; q < N ;q++) {
 		#pragma omp parallel shared(forces, force_qk,mass,pos,dist,dist_cubed,x_diff,y_diff) private(q,k)
+		{
+		#pragma omp parallel for schedule(dynamic)
 		{
 		    for(k = 0; k < N ;k++) {
 			  if(k > q){
@@ -77,9 +82,12 @@ int main(void){
 		   }
 		}
 		}
+		}
 
 		//Calculate New Position
 		#pragma omp parallel shared(pos, vel,mass,forces) private(h)
+        {
+        #pragma omp parallel for schedule(dynamic)
         {
 		for(h=0 ;h < N; h++){
 				pos[h][X] += delta_t*vel[h][X];
@@ -89,6 +97,7 @@ int main(void){
 				vel[h][Y] += delta_t/mass[h]*forces[h][Y];
 			//	printf("Final Velocity %f, %f\n", vel[h][X], vel[h][Y]);
 
+		}
 		}
 		}
 
